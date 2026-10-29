@@ -9,6 +9,9 @@ public sealed class Booking
     private readonly List<BookingStatusEvent> _statusHistory = new();
     private readonly List<PriceOffer> _priceOffers = new();
 
+    // Maximum number of offer/counter-offer rounds allowed per booking negotiation.
+    private const int MaxNegotiationRounds = 5;
+
     // Every legal next-status for each current status. Anything not listed here is refused —
     // this is what makes an illegal jump like Completed -> Requested impossible.
     private static readonly Dictionary<BookingStatus, BookingStatus[]> AllowedTransitions = new()
@@ -67,6 +70,9 @@ public sealed class Booking
         if (Status != BookingStatus.Requested && Status != BookingStatus.Negotiating)
             throw new InvalidOperationException($"Cannot submit a price offer while the booking is {Status}.");
 
+        if (_priceOffers.Count >= MaxNegotiationRounds)
+            throw new InvalidOperationException($"This booking has reached the maximum of {MaxNegotiationRounds} negotiation rounds.");
+
         var previousPending = _priceOffers.LastOrDefault(o => o.Status == OfferStatus.Pending);
         previousPending?.MarkCountered();
 
@@ -98,6 +104,7 @@ public sealed class Booking
 
     public void RejectOffer(Guid offerId)
     {
+
         var offer = _priceOffers.FirstOrDefault(o => o.Id == offerId)
             ?? throw new InvalidOperationException("No such price offer on this booking.");
 

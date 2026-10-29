@@ -44,6 +44,21 @@ public class BookingTests
     }
 
     [Fact]
+    public void SubmitOffer_SixthRound_Throws()
+    {
+        var booking = CreateRequestedBooking(out var customerId, out var driverId);
+
+        booking.SubmitOffer(customerId, new Money(500m, "ZAR"), customerId);
+        booking.SubmitOffer(driverId, new Money(600m, "ZAR"), driverId);
+        booking.SubmitOffer(customerId, new Money(550m, "ZAR"), customerId);
+        booking.SubmitOffer(driverId, new Money(580m, "ZAR"), driverId);
+        booking.SubmitOffer(customerId, new Money(560m, "ZAR"), customerId);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            booking.SubmitOffer(driverId, new Money(570m, "ZAR"), driverId));
+    }
+
+    [Fact]
     public void AcceptOffer_SetsDriverAndAgreedPrice_AndMovesToAccepted()
     {
         var booking = CreateRequestedBooking(out var customerId, out var driverId);
