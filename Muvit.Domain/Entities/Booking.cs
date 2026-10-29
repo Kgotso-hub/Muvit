@@ -39,23 +39,24 @@ public sealed class Booking
     public IReadOnlyList<BookingStatusEvent> StatusHistory => _statusHistory.AsReadOnly();
     public IReadOnlyList<PriceOffer> PriceOffers => _priceOffers.AsReadOnly();
 
-    private Booking(Guid customerId, Address pickup, Address dropoff)
+    private Booking(Guid customerId, Address pickup, Address dropoff, double distanceKm)
     {
         Id = Guid.NewGuid();
         CustomerId = customerId;
         PickupAddress = pickup;
         DropoffAddress = dropoff;
-        DistanceKm = pickup.Coordinate.DistanceTo(dropoff.Coordinate);
+        DistanceKm = distanceKm;
         Status = BookingStatus.Requested;
         RequestedAt = DateTime.UtcNow;
     }
 
-    public static Booking RequestMove(Guid customerId, Address pickup, Address dropoff)
+    public static Booking RequestMove(Guid customerId, Address pickup, Address dropoff, double distanceKm)
     {
         if (pickup is null) throw new ArgumentNullException(nameof(pickup));
         if (dropoff is null) throw new ArgumentNullException(nameof(dropoff));
+        if (distanceKm < 0) throw new ArgumentOutOfRangeException(nameof(distanceKm), "Distance cannot be negative.");
 
-        var booking = new Booking(customerId, pickup, dropoff);
+        var booking = new Booking(customerId, pickup, dropoff, distanceKm);
         booking.RecordStatusEvent(BookingStatus.Requested, customerId, "Move requested.");
         return booking;
     }

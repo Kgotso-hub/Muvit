@@ -134,7 +134,8 @@ public class BookingTests
         driverId = Guid.NewGuid();
         var pickup = CreateAddress(-26.2041m, 28.0473m);
         var dropoff = CreateAddress(-25.7479m, 28.2293m);
-        return Booking.RequestMove(customerId, pickup, dropoff);
+        var distanceKm = pickup.Coordinate!.DistanceTo(dropoff.Coordinate!);
+        return Booking.RequestMove(customerId, pickup, dropoff, distanceKm);
     }
 
     private static Booking CreateAcceptedBooking(out Guid driverId)
