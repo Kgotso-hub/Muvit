@@ -1,6 +1,6 @@
 using Muvit.Domain.Entities;
 
-namespace Muvit.application.Interfaces.Repositories;
+namespace Muvit.Application.Interfaces.Repositories;
 
 public interface IUserRepository
 {
