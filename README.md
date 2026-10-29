@@ -1,6 +1,6 @@
 # Muvit
 
-A platform connecting customers who need moving/hauling services with independent drivers who offer them. Customers search for drivers, negotiate a price based on distance, and book — all payments go through the platform, never directly to the driver. The platform collects payment, keeps a commission, and pays out the remainder to the driver.
+A platform connecting customers who need moving/hauling services with independent drivers who offer them. Customers search for drivers, negotiate a price based on distance, and book: all payments go through the platform, never directly to the driver. The platform collects payment, keeps a commission, and pays out the remainder to the driver.
 
 ## Status: actively in development
 
