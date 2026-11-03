@@ -6,11 +6,12 @@ namespace Muvit.Domain.Entities;
 public sealed class PriceOffer
 {
     public Guid Id { get; }
-    public Guid OfferedByUserId { get; }
-    public Money Amount { get; }
-    public OfferType Type { get; }
+    public Guid OfferedByUserId { get; private set;}
+    public Money Amount { get; } = null!;
+    public OfferType Type { get; private set;}
     public OfferStatus Status { get; private set; }
-    public DateTime CreatedAt { get; }
+    public DateTime CreatedAt { get; private set;}
+    private PriceOffer() { }
 
     internal PriceOffer(Guid offeredByUserId, Money amount, OfferType type)
     {

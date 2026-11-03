@@ -6,14 +6,15 @@ namespace Muvit.Domain.Entities;
 public sealed class Payment
 {
     public Guid Id { get; }
-    public Guid BookingId { get; }
-    public Guid CustomerId { get; }
-    public Money Amount { get; }
-    public string? GatewayName { get; }
+    public Guid BookingId { get; private set; }
+    public Guid CustomerId { get; private set; }
+    public Money Amount { get; } = null!;
+    public string? GatewayName { get; private set;}
     public string? GatewayReference { get; private set; }
     public PaymentStatus Status { get; private set; }
     public DateTime? PaidAt { get; private set; }
-    public DateTime CreatedAt { get; }
+    public DateTime CreatedAt { get; private set;}
+    private Payment() { }
 
     private Payment(Guid bookingId, Guid customerId, Money amount, string? gatewayName)
     {

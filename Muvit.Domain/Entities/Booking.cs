@@ -11,6 +11,7 @@ public sealed class Booking
 
     // Maximum number of offer/counter-offer rounds allowed per booking negotiation.
     private const int MaxNegotiationRounds = 5;
+    private Booking() { }
 
     // Every legal next-status for each current status. Anything not listed here is refused —
     // this is what makes an illegal jump like Completed -> Requested impossible.
@@ -27,14 +28,14 @@ public sealed class Booking
     };
 
     public Guid Id { get; }
-    public Guid CustomerId { get; }
+    public Guid CustomerId { get; private set;}
     public Guid? DriverId { get; private set; }
-    public Address PickupAddress { get; }
-    public Address DropoffAddress { get; }
-    public double DistanceKm { get; }
+    public Address PickupAddress { get; } = null!;
+    public Address DropoffAddress { get; } = null!;
+    public double DistanceKm { get; private set;}
     public Money? AgreedPrice { get; private set; }
     public BookingStatus Status { get; private set; }
-    public DateTime RequestedAt { get; }
+    public DateTime RequestedAt { get; private set;}
     public DateTime? AcceptedAt { get; private set; }
     public DateTime? CompletedAt { get; private set; }
     public DateTime? CancelledAt { get; private set; }

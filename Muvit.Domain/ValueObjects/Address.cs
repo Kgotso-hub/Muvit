@@ -2,13 +2,15 @@ namespace Muvit.Domain.ValueObjects;
 
 public sealed record Address
 {
-    public string Line1 { get; }
-    public string? Line2 { get; }
-    public string City { get; }
-    public string? StateProvince { get; }
-    public string? PostalCode { get; }
-    public string Country { get; }
-    public GeoCoordinate? Coordinate { get; }
+public string Line1 { get; } = null!;
+public string? Line2 { get; }
+public string City { get; } = null!;
+public string? StateProvince { get; }
+public string? PostalCode { get; }
+public string Country { get; } = null!;
+public GeoCoordinate? Coordinate { get; }
+
+private Address() { }
 
     public Address(
         string line1,

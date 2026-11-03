@@ -6,17 +6,19 @@ namespace Muvit.Domain.Entities;
 public sealed class Payout
 {
     public Guid Id { get; }
-    public Guid PaymentId { get; }
-    public Guid BookingId { get; }
-    public Guid DriverId { get; }
-    public Money GrossAmount { get; }
-    public decimal CommissionRate { get; }
-    public Money CommissionAmount { get; }
-    public Money NetPayoutAmount { get; }
+    public Guid PaymentId { get; private set;}
+    public Guid BookingId { get; private set;}
+    public Guid DriverId { get; private set; }
+    public Money GrossAmount { get; } = null!;
+    public decimal CommissionRate { get; private set;}
+    public Money CommissionAmount { get; } = null!;
+    public Money NetPayoutAmount { get; } = null!;
     public PayoutStatus Status { get; private set; }
     public Guid? ProcessedByAdminId { get; private set; }
     public DateTime? ProcessedAt { get; private set; }
-    public DateTime CreatedAt { get; }
+    public DateTime CreatedAt { get; private set;}
+
+    private Payout() { }
 
     private Payout(Guid paymentId, Guid bookingId, Guid driverId, Money grossAmount, decimal commissionRate)
     {

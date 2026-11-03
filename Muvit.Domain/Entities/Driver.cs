@@ -5,7 +5,9 @@ namespace Muvit.Domain.Entities;
 
 public sealed class Driver : User
 {
-    public DriverProfile Profile { get; private init; }
+    public DriverProfile Profile { get; private init; } = null!;
+
+    private Driver() { }
 
     public Driver(string fullName, string email, string phoneNumber, string passwordHash, VehicleInfo vehicle)
         : base(fullName, email, phoneNumber, passwordHash)

@@ -5,11 +5,12 @@ namespace Muvit.Domain.Entities;
 
 public sealed class DriverProfile
 {
-    public VehicleInfo Vehicle { get; private set; }
+    public VehicleInfo Vehicle { get; private set; } = null!;
     public VerificationStatus Verification { get; private set; }
     public AvailabilityStatus Availability { get; private set; }
     public decimal? AverageRating { get; private set; }
     public int RatingCount { get; private set; }
+    private DriverProfile() { }
 
     public DriverProfile(VehicleInfo vehicle)
     {

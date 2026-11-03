@@ -5,12 +5,14 @@ namespace Muvit.Domain.Entities;
 public abstract class User
 {
     public Guid Id { get; private init; }
-    public string FullName { get; private set; }
-    public string Email { get; private set; }
-    public string PhoneNumber { get; private set; }
-    public string PasswordHash { get; private set; }
+    public string FullName { get; private set; } = null!;
+    public string Email { get; private set; } = null!;
+    public string PhoneNumber { get; private set; } = null!;
+    public string PasswordHash { get; private set; } = null!;
     public UserStatus Status { get; private set; }
     public DateTime CreatedAt { get; private init; }
+
+    protected User() { }
 
     protected User(string fullName, string email, string phoneNumber, string passwordHash)
     {
