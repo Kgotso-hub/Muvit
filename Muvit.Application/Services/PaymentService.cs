@@ -21,9 +21,11 @@ public sealed class PaymentService
         var payment = Payment.Initiate(bookingId, customerId, amount, gatewayName);
         await _paymentRepository.AddAsync(payment);
 
-        var result = await _paymentGateway.ChargeAsync(amount, paymentMethodToken);
+        var result = await _paymentGateway.ChargeAsync(payment.Id, amount, paymentMethodToken);
 
-        if (result.Succeeded)
+        if (result.RequiresConfirmation)
+            payment.AwaitGatewayConfirmation(result.GatewayReference!);
+        else if (result.Succeeded)
             payment.MarkCompleted(result.GatewayReference!);
         else
             payment.MarkFailed();

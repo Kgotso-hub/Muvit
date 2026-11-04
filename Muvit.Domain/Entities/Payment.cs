@@ -42,6 +42,18 @@ public sealed class Payment
         PaidAt = DateTime.UtcNow;
     }
 
+    public void AwaitGatewayConfirmation(string gatewayReference)
+    {
+        EnsureStatus(PaymentStatus.Pending, "awaiting gateway confirmation");
+
+        if (string.IsNullOrWhiteSpace(gatewayReference))
+            throw new ArgumentException("Gateway reference is required to await confirmation.", nameof(gatewayReference));
+
+        GatewayReference = gatewayReference;
+        // Status deliberately stays Pending — a redirect-based gateway (e.g. PayFast)
+        // hasn't actually collected payment yet; the real outcome arrives later via webhook (M5).
+    }
+
     public void MarkFailed()
     {
         EnsureStatus(PaymentStatus.Pending, "failed");

@@ -27,7 +27,7 @@ public class PaymentServiceTests
         var amount = new Money(500m, "ZAR");
 
         _paymentGateway
-            .Setup(g => g.ChargeAsync(amount, "tok_test"))
+            .Setup(g => g.ChargeAsync(It.IsAny<Guid>(), amount, "tok_test"))
             .ReturnsAsync(new PaymentGatewayResult(true, "ch_123", null));
 
         var payment = await _sut.ProcessPaymentAsync(bookingId, customerId, amount, "tok_test");
@@ -46,12 +46,31 @@ public class PaymentServiceTests
         var amount = new Money(500m, "ZAR");
 
         _paymentGateway
-            .Setup(g => g.ChargeAsync(amount, "tok_test"))
+            .Setup(g => g.ChargeAsync(It.IsAny<Guid>(), amount, "tok_test"))
             .ReturnsAsync(new PaymentGatewayResult(false, null, "Card declined."));
 
         var payment = await _sut.ProcessPaymentAsync(bookingId, customerId, amount, "tok_test");
 
         Assert.Equal(PaymentStatus.Failed, payment.Status);
+        _paymentRepository.Verify(r => r.AddAsync(payment), Times.Once);
+        _paymentRepository.Verify(r => r.UpdateAsync(payment), Times.Once);
+    }
+
+    [Fact]
+    public async Task ProcessPaymentAsync_GatewayRequiresConfirmation_LeavesPaymentPending()
+    {
+        var bookingId = Guid.NewGuid();
+        var customerId = Guid.NewGuid();
+        var amount = new Money(500m, "ZAR");
+
+        _paymentGateway
+            .Setup(g => g.ChargeAsync(It.IsAny<Guid>(), amount, "tok_test"))
+            .ReturnsAsync(new PaymentGatewayResult(false, "pf_redirect_abc", null, RequiresConfirmation: true));
+
+        var payment = await _sut.ProcessPaymentAsync(bookingId, customerId, amount, "tok_test");
+
+        Assert.Equal(PaymentStatus.Pending, payment.Status);
+        Assert.Equal("pf_redirect_abc", payment.GatewayReference);
         _paymentRepository.Verify(r => r.AddAsync(payment), Times.Once);
         _paymentRepository.Verify(r => r.UpdateAsync(payment), Times.Once);
     }
