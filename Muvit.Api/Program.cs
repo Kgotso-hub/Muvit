@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Muvit.Infrastructure.Data;
 using Muvit.Application.Interfaces.Repositories;
 using Muvit.Infrastructure.Repositories;
+using Muvit.Application.Interfaces.Services;
+using Muvit.Infrastructure.PaymentGateways;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,8 @@ builder.Services.AddScoped<IUserRepository, SqlUserRepository>();
 builder.Services.AddScoped<IBookingRepository, SqlBookingRepository>();
 builder.Services.AddScoped<IPaymentRepository, SqlPaymentRepository>();
 builder.Services.AddScoped<IPayoutRepository, SqlPayoutRepository>();
+
+builder.Services.AddHttpClient<IPaymentGateway, PayFastPaymentGateway>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
