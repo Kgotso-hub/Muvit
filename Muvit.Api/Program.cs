@@ -5,6 +5,7 @@ using Muvit.Infrastructure.Repositories;
 using Muvit.Application.Interfaces.Services;
 using Muvit.Infrastructure.PaymentGateways;
 using Muvit.Infrastructure.DistanceCalculation;
+using Muvit.Infrastructure.Notifications;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ builder.Services.AddScoped<IPayoutRepository, SqlPayoutRepository>();
 
 builder.Services.AddHttpClient<IPaymentGateway, PayFastPaymentGateway>();
 builder.Services.AddScoped<IDistanceCalculator, HaversineDistanceCalculator>();
+builder.Services.AddScoped<INotificationService, SmtpNotificationService>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

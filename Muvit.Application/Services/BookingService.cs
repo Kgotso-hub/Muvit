@@ -10,11 +10,13 @@ public sealed class BookingService
 {
     private readonly IBookingRepository _bookingRepository;
     private readonly IDistanceCalculator _distanceCalculator;
+    private readonly INotificationService _notificationService;
 
-    public BookingService(IBookingRepository bookingRepository, IDistanceCalculator distanceCalculator)
+    public BookingService(IBookingRepository bookingRepository, IDistanceCalculator distanceCalculator, INotificationService notificationService)
     {
         _bookingRepository = bookingRepository;
         _distanceCalculator = distanceCalculator;
+        _notificationService = notificationService;
     }
 
     public async Task<Booking> RequestMoveAsync(Guid customerId, Address pickup, Address dropoff)
@@ -28,6 +30,9 @@ public sealed class BookingService
 
         var booking = Booking.RequestMove(customerId, pickup, dropoff, distanceKm);
         await _bookingRepository.AddAsync(booking);
+
+        await _notificationService.NotifyAsync(booking.CustomerId, "Booking Confirmed",
+            $"Your move request has been received. Estimated distance: {distanceKm:F1} km.");
 
         return booking;
     }
@@ -50,6 +55,9 @@ public sealed class BookingService
         booking.UpdateStatus(newStatus, changedByUserId, note);
 
         await _bookingRepository.UpdateAsync(booking);
+
+        await _notificationService.NotifyAsync(booking.CustomerId, "Booking Status Updated",
+            $"Your booking status has changed to {newStatus}.");
     }
 
     public async Task<Money?> CancelAsync(Guid bookingId, Guid changedByUserId, Money? cancellationFee, string? note = null)

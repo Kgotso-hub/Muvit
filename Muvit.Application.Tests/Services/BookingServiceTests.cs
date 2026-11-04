@@ -3,6 +3,7 @@ using Muvit.Application.Interfaces.Repositories;
 using Muvit.Application.Interfaces.Services;
 using Muvit.Application.Services;
 using Muvit.Domain.Entities;
+using Muvit.Domain.Enums;
 using Muvit.Domain.ValueObjects;
 using Xunit;
 
@@ -12,11 +13,12 @@ public class BookingServiceTests
 {
     private readonly Mock<IBookingRepository> _bookingRepository = new();
     private readonly Mock<IDistanceCalculator> _distanceCalculator = new();
+    private readonly Mock<INotificationService> _notificationService = new();
     private readonly BookingService _sut; //"system under test”
 
     public BookingServiceTests()
     {
-        _sut = new BookingService(_bookingRepository.Object, _distanceCalculator.Object);
+        _sut = new BookingService(_bookingRepository.Object, _distanceCalculator.Object, _notificationService.Object);
     }
 
     [Fact]
@@ -35,6 +37,7 @@ public class BookingServiceTests
         Assert.Equal(58.3, booking.DistanceKm);
         Assert.Equal(customerId, booking.CustomerId);
         _bookingRepository.Verify(r => r.AddAsync(booking), Times.Once);
+        _notificationService.Verify(n => n.NotifyAsync(customerId, "Booking Confirmed", It.IsAny<string>()), Times.Once);
     }
 
     [Fact]
@@ -48,6 +51,26 @@ public class BookingServiceTests
 
         _distanceCalculator.Verify(d => d.GetDistanceKmAsync(It.IsAny<GeoCoordinate>(), It.IsAny<GeoCoordinate>()), Times.Never);
         _bookingRepository.Verify(r => r.AddAsync(It.IsAny<Booking>()), Times.Never);
+        _notificationService.Verify(n => n.NotifyAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateJobStatusAsync_ValidTransition_UpdatesStatusAndNotifiesCustomer()
+    {
+        var customerId = Guid.NewGuid();
+        var driverId = Guid.NewGuid();
+        var pickup = CreateAddress(-26.2041m, 28.0473m);
+        var dropoff = CreateAddress(-25.7479m, 28.2293m);
+        var booking = Booking.RequestMove(customerId, pickup, dropoff, 58.3);
+        booking.AssignDriver(driverId, new Money(500m, "ZAR"), driverId);
+
+        _bookingRepository.Setup(r => r.GetByIdAsync(booking.Id)).ReturnsAsync(booking);
+
+        await _sut.UpdateJobStatusAsync(booking.Id, BookingStatus.EnRoute, driverId);
+
+        Assert.Equal(BookingStatus.EnRoute, booking.Status);
+        _bookingRepository.Verify(r => r.UpdateAsync(booking), Times.Once);
+        _notificationService.Verify(n => n.NotifyAsync(customerId, "Booking Status Updated", It.IsAny<string>()), Times.Once);
     }
 
     private static Address CreateAddress(decimal lat, decimal lon) =>
