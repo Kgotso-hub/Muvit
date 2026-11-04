@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Muvit.Infrastructure.Data;
+using Muvit.Application.Interfaces.Repositories;
+using Muvit.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +10,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddDbContext<MuvitDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IUserRepository, SqlUserRepository>();
+builder.Services.AddScoped<IBookingRepository, SqlBookingRepository>();
+builder.Services.AddScoped<IPaymentRepository, SqlPaymentRepository>();
+builder.Services.AddScoped<IPayoutRepository, SqlPayoutRepository>();
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
