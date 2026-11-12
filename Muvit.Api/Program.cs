@@ -1,12 +1,17 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Muvit.Infrastructure.Data;
+using Microsoft.IdentityModel.Tokens;
 using Muvit.Application.Interfaces.Repositories;
-using Muvit.Infrastructure.Repositories;
 using Muvit.Application.Interfaces.Services;
-using Muvit.Infrastructure.PaymentGateways;
+using Muvit.Application.Services;
+using Muvit.Infrastructure.Auth;
+using Muvit.Infrastructure.CommissionStrategies;
+using Muvit.Infrastructure.Data;
 using Muvit.Infrastructure.DistanceCalculation;
 using Muvit.Infrastructure.Notifications;
-using Muvit.Infrastructure.CommissionStrategies;
+using Muvit.Infrastructure.PaymentGateways;
+using Muvit.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +30,27 @@ builder.Services.AddHttpClient<IPaymentGateway, PayFastPaymentGateway>();
 builder.Services.AddScoped<IDistanceCalculator, HaversineDistanceCalculator>();
 builder.Services.AddScoped<INotificationService, SmtpNotificationService>();
 builder.Services.AddScoped<ICommissionStrategy, FlatRateCommissionStrategy>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
+
+builder.Services.AddScoped<AuthService>();
+
+var jwtSection = builder.Configuration.GetSection("Jwt");
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtSection["Issuer"],
+            ValidateAudience = true,
+            ValidAudience = jwtSection["Audience"],
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection["SigningKey"]!))
+        };
+    });
+builder.Services.AddAuthorization();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -39,6 +65,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
